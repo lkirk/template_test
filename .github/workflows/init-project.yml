@@ -1,0 +1,23 @@
+name: Initialize repo
+
+on: [push]
+
+permissions: write-all
+
+jobs:
+  rename-project:
+    if: ${{ !contains (github.repository, '/test_template') }}  # prevents from running on original template
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - run: ./github/init.sh
+        shell: bash
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Fresh project"
+          push_options: --force
