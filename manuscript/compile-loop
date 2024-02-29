@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+FILE="$1"
+
+mkdir -p out
+
+while true; do
+    fswatch --one-event "$FILE" \
+        | sort -u \
+        | xargs -I{} sh -c '
+            for f in *.bib *.png *.svg; do
+                ln -frs "$f" out
+            done
+            (cd out;
+             pdflatex --shell-escape "{}" &&
+             bibtex $(basename "{}" .tex) &&
+             pdflatex --shell-escape "{}" &&
+             pdflatex --shell-escape "{}" &&
+             cp $(basename "{}" .tex).pdf ..
+            ) || true'
+done
