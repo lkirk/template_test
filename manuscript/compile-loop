@@ -1,22 +1,21 @@
-#!/bin/sh
-set -eu
+#!/bin/bash
+
+# This script runs latex compilation in a loop, using the fswatch command. Any time the file is modified (saved to, or simply "touch"ed, then this script will recompile 
 
 FILE="$1"
 
-mkdir -p out
+if [[ -z "$FILE" ]]; then
+    echo "ERROR: no filename specified"
+    echo "usage: ./compile-loop <filename>"
+    exit 1
+fi
+
+set -eu
+
+if ! command -v fswatch &> /dev/null; then
+    echo "the 'fswatch' was not found, please install before running"
+fi
 
 while true; do
-    fswatch --one-event "$FILE" \
-        | sort -u \
-        | xargs -I{} sh -c '
-            for f in *.bib *.png *.svg; do
-                ln -frs "$f" out
-            done
-            (cd out;
-             pdflatex --shell-escape "{}" &&
-             bibtex $(basename "{}" .tex) &&
-             pdflatex --shell-escape "{}" &&
-             pdflatex --shell-escape "{}" &&
-             cp $(basename "{}" .tex).pdf ..
-            ) || true'
+    fswatch --one-event "$FILE" | sort -u | xargs -I{} bash -c './compile "{}" || true'
 done

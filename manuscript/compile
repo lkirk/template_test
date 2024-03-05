@@ -1,0 +1,32 @@
+#!/bin/bash
+
+FILE="$1"
+
+if [[ -z "$FILE" ]]; then
+    echo "ERROR: no filename specified"
+    echo "usage: ./compile <filename>"
+    exit 1
+fi
+
+# fail on missing variables and any nonzero exit
+set -euo pipefail
+
+mkdir -p out
+
+# link files required for compilation into the "out" dir
+for glob in "*.bib" "*.png" "*.svg"; do
+    if compgen -G "$glob" > /dev/null; then
+        for f in $glob; do
+            ln -frs "$f" out
+        done
+    fi
+done
+
+file_realpath="$(realpath "$FILE")"
+
+cd out
+pdflatex --shell-escape "$file_realpath"
+bibtex $(basename "$file_realpath" .tex)
+pdflatex --shell-escape "$file_realpath"
+pdflatex --shell-escape "$file_realpath"
+cp $(basename "$file_realpath" .tex).pdf ..
