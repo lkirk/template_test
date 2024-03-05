@@ -1,4 +1,10 @@
 #!/bin/bash
+#
+# Compile a specified latex document. This script creates an output
+# directory and links all related compilation files into that directory
+# so that the mess of latex intermediate files can be contained in
+# their own directory. This script runs pdflatex and bibtex.
+#
 
 FILE="$1"
 
@@ -14,7 +20,7 @@ set -euo pipefail
 mkdir -p out
 
 # link files required for compilation into the "out" dir
-for glob in "*.bib" "*.png" "*.svg"; do
+for glob in "*.bib" "figures/*.png" "figures/*.svg"; do
     if compgen -G "$glob" > /dev/null; then
         for f in $glob; do
             ln -frs "$f" out
@@ -24,6 +30,7 @@ done
 
 file_realpath="$(realpath "$FILE")"
 
+# run compilation
 cd out
 pdflatex --shell-escape "$file_realpath"
 bibtex $(basename "$file_realpath" .tex)

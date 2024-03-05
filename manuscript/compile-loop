@@ -1,6 +1,9 @@
 #!/bin/bash
-
-# This script runs latex compilation in a loop, using the fswatch command. Any time the file is modified (saved to, or simply "touch"ed, then this script will recompile 
+#
+# This script runs latex compilation in a loop, using the fswatch command.
+# Any time the latex file is modified (saved to, or simply "touch"ed),
+# this script will recompile
+#
 
 FILE="$1"
 
